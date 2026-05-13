@@ -1,0 +1,5 @@
+name: data-science
+displayName: Data Science Agent
+description: Automated data science agent for SQL generation, data analysis, and visualization with telemetry-instrumented workflows.
+industry: technology
+tags: [data-science, sql, analytics, visualization]
