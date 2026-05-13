@@ -213,5 +213,5 @@ Customer deployment flow:
   1. bash setup.sh <PROJECT_ID>          # Create GCP resources (if needed)
   2. make install && make backend        # Deploy agent
 
-Next: submit a PR to https://github.com/cloud-gtm/agent-portal-templates
+Next: submit a PR to https://github.com/cloud-gtm/agent-hub
 ```
