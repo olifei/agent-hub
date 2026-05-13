@@ -187,12 +187,44 @@ uvx google-agents-cli scaffold enhance --agent-directory <agent_dir> --deploymen
 
 Show the output to the developer.
 
-## Step 7: Verify
+## Step 7: Generate deploy.sh
+
+Create a `deploy.sh` in the project root that customers use for one-click deployment:
+
+```bash
+#!/bin/bash
+set -e
+
+PROJECT_ID="${1:?Usage: bash deploy.sh <PROJECT_ID> [REGION]}"
+REGION="${2:-us-central1}"
+
+echo "Deploying agent to project: $PROJECT_ID (region: $REGION)"
+
+# Create GCP resources if setup.sh exists
+if [ -f setup.sh ]; then
+    echo "Setting up GCP resources..."
+    bash setup.sh "$PROJECT_ID" "$REGION"
+fi
+
+# Install dependencies and deploy
+echo "Installing dependencies..."
+make install
+
+echo "Deploying to Agent Engine..."
+GOOGLE_CLOUD_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_LOCATION="$REGION" make backend
+
+echo "Deployment complete!"
+```
+
+Present to developer and confirm before writing.
+
+## Step 8: Verify
 
 After all steps are complete, verify the project structure:
 
 ```bash
 ls agent.yaml
+ls deploy.sh
 ls <agent_dir>/agent.py
 grep "root_agent" <agent_dir>/agent.py
 grep "agent-starter-pack" pyproject.toml
@@ -202,6 +234,7 @@ Present a summary:
 
 ```
 ✓ agent.yaml — metadata for Portal
+✓ deploy.sh — one-click deployment script
 ✓ agent.py — has root_agent
 ✓ pyproject.toml — has ASP config
 ✓ setup.sh — resource setup script (if applicable)
@@ -210,8 +243,9 @@ Present a summary:
 Your agent is ready for Agent Portal!
 
 Customer deployment flow:
-  1. bash setup.sh <PROJECT_ID>          # Create GCP resources (if needed)
-  2. make install && make backend        # Deploy agent
+  git clone https://github.com/olifei/agent-hub
+  cd agent-hub/<agent-name>
+  bash deploy.sh <PROJECT_ID>
 
-Next: submit a PR to https://github.com/cloud-gtm/agent-hub
+Next: submit a PR to https://github.com/olifei/agent-hub
 ```

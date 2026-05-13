@@ -1,5 +1,0 @@
-name: customer-service
-displayName: Customer Service Agent
-description: Customer service demo agent that handles support inquiries, routes issues, and provides automated responses.
-industry: customer-support
-tags: [customer-service, support, chatbot]
