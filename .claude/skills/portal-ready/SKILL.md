@@ -1,6 +1,6 @@
 ---
 name: portal-ready
-description: Prepare an ADK agent project for Agent Portal. Generates agent.yaml metadata, scans for GCP service dependencies, generates Terraform configs, and runs agents-cli scaffold enhance. Use when a developer wants to make their agent deployable via Agent Portal.
+description: Prepare an ADK agent project for Agent Portal. Generates agent.yaml metadata, scans for GCP dependencies, checks or generates setup.sh, and runs agents-cli scaffold enhance. Use when a developer wants to make their agent deployable via Agent Portal.
 disable-model-invocation: true
 allowed-tools: Bash(grep *) Bash(find *) Bash(cat *) Bash(ls *) Bash(uvx *) Bash(agents-cli *)
 ---
@@ -44,13 +44,14 @@ Scan ALL Python files in the project for usage of GCP services. Look for:
 - `google.cloud.spanner` → **Spanner**
 - `google.cloud.pubsub` → **Pub/Sub**
 - `google.cloud.discoveryengine` or `vertex_ai_search` → **Vertex AI Search**
+- `google.cloud.alloydb` or `alloydb` or `psycopg2` → **AlloyDB**
 - MCP tool connections (MCPToolset, StreamableHTTPConnectionParams) → **MCP Server**
 - A2A references (to_a2a, a2a_sdk) → **A2A Service**
 - Environment variables referencing external API keys → **External APIs**
 
-Also check `.env.example`, `.env`, and any config files for service references.
+Also check `.env.example`, `.env`, config files, and seed data directories (CSV, SQL, JSON files) for service and data references.
 
-Present your findings as a list:
+Present your findings:
 
 ```
 GCP Services detected:
@@ -60,46 +61,96 @@ GCP Services detected:
 External dependencies:
   ✓ FRED_API_KEY — found in .env.example
 
-No Terraform configuration found in deployment/terraform/.
+Seed data:
+  ✓ data/flights.csv — likely for BigQuery
 ```
 
-Ask the developer: "Are there any services I missed? Please add or remove from this list."
+Ask the developer: "Are there any services or data dependencies I missed?"
 
-## Step 4: Generate Terraform configurations
+## Step 4: Check or generate setup.sh
 
-If GCP services were identified in Step 3, generate Terraform configurations in `deployment/terraform/`.
+Check if `setup.sh` exists in the project root.
 
-For each service, create the appropriate `.tf` file following ASP conventions:
+### If setup.sh exists — validate it
 
-- **Cloud Storage**: Create bucket resource
-- **BigQuery**: Create dataset and table resources
-- **Firestore**: Create database resource
-- **Secret Manager**: Create secret resources for each API key
-- **IAM**: Create service account bindings for all required services
+Read the script and check against this checklist:
 
-Use variables for project_id, region, and project_name. Follow this pattern:
+| Check | What to look for |
+|-------|-----------------|
+| PROJECT_ID parameterized | Accepts project ID as argument, no hardcoded project IDs |
+| No sensitive info | No API keys, passwords, or secrets in the script |
+| Dependency consistency | All GCP services detected in Step 3 have corresponding setup commands |
+| API enablement | Has `gcloud services enable` for each required API |
+| IAM roles | Sets up necessary Service Account roles |
+| Cleanup support | Supports `--cleanup` flag to remove created resources |
+| Error handling | Has `set -e` or equivalent error checking |
+| Tool availability | Only uses tools available in Cloud Shell (gcloud, bq, gsutil, python3, etc.) |
+| Data file references | All referenced seed data files exist in the repo |
+| Environment variable output | Writes created resource info to `.env` or prints for user |
+| Cost warning | Mentions that paid resources will be created |
+| Idempotent | Handles already-existing resources gracefully (skip or update, not fail) |
 
-```hcl
-variable "project_id" {
-  description = "GCP project ID"
-  type        = string
-}
+Present results:
 
-variable "region" {
-  description = "GCP region"
-  type        = string
-  default     = "us-central1"
-}
-
-variable "project_name" {
-  description = "Project name for resource naming"
-  type        = string
-}
+```
+setup.sh validation:
+  ✓ PROJECT_ID parameterized
+  ✓ No sensitive info
+  ✗ Missing API enablement for bigquery.googleapis.com
+  ✗ No cleanup support
+  ✓ Error handling (set -e)
+  ...
 ```
 
-Present the generated Terraform files to the developer and ask them to confirm before writing.
+Ask the developer to fix any issues found.
 
-If no GCP services were found, skip this step.
+### If setup.sh does not exist
+
+If GCP services or seed data were detected in Step 3, generate a `setup.sh` that:
+
+- Accepts `PROJECT_ID` as first argument, `REGION` as optional second (default: us-central1)
+- Supports `--cleanup` flag
+- Has `set -e` for error handling
+- Prints a cost warning at the start
+- Enables required APIs
+- Creates detected GCP resources (BigQuery datasets, GCS buckets, etc.)
+- Loads seed data if present in the repo
+- Sets up IAM roles
+- Outputs resource info for `.env`
+- Is idempotent
+
+Follow this structure:
+
+```bash
+#!/bin/bash
+set -e
+
+PROJECT_ID="${1:?Usage: bash setup.sh <PROJECT_ID> [REGION]}"
+REGION="${2:-us-central1}"
+
+if [ "$2" = "--cleanup" ] || [ "$3" = "--cleanup" ]; then
+    echo "Cleaning up resources..."
+    # cleanup commands
+    exit 0
+fi
+
+echo "This will create paid GCP resources in project: $PROJECT_ID"
+read -p "Continue? (y/N): " confirm
+[ "$confirm" = "y" ] || exit 0
+
+echo "[1/N] Enabling APIs..."
+echo "[2/N] Creating resources..."
+echo "[3/N] Loading seed data..."
+echo "[4/N] Setting up IAM..."
+
+echo "Done! Resource info:"
+echo "  DATASET_ID=..."
+echo "  BUCKET_NAME=..."
+```
+
+Present the generated setup.sh and ask the developer to confirm before writing.
+
+If no GCP services or data dependencies were detected, skip this step.
 
 ## Step 5: Ensure pyproject.toml has ASP configuration
 
@@ -131,7 +182,6 @@ Show the output to the developer.
 After all steps are complete, verify the project structure:
 
 ```bash
-# Check required files exist
 ls agent.yaml
 ls <agent_dir>/agent.py
 grep "root_agent" <agent_dir>/agent.py
@@ -144,9 +194,14 @@ Present a summary:
 ✓ agent.yaml — metadata for Portal
 ✓ agent.py — has root_agent
 ✓ pyproject.toml — has ASP config
-✓ deployment/terraform/ — resource declarations (if applicable)
+✓ setup.sh — resource setup script (if applicable)
 ✓ agents-cli enhance — deployment files added
 
 Your agent is ready for Agent Portal!
+
+Customer deployment flow:
+  1. bash setup.sh <PROJECT_ID>          # Create GCP resources (if needed)
+  2. make install && make backend        # Deploy agent
+
 Next: submit a PR to https://github.com/cloud-gtm/agent-portal-templates
 ```
