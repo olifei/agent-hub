@@ -1,0 +1,11 @@
+name: llm-auditor
+displayName: LLM Auditor Agent
+description: >-
+  Automated fact-checking agent that evaluates LLM-generated responses, verifies
+  factual accuracy using web search, and rewrites content to correct inaccuracies.
+industry: technology
+tags:
+  - fact-checking
+  - auditing
+  - content-verification
+  - multi-agent

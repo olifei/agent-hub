@@ -1,0 +1,12 @@
+name: financial-advisor
+displayName: Financial Advisor Agent
+description: >-
+  AI-driven financial advisor with sub-agents for data analysis, risk assessment,
+  trade execution, and portfolio management.
+industry: finance
+tags:
+  - finance
+  - investment
+  - advisory
+  - portfolio
+  - multi-agent

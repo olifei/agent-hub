@@ -1,0 +1,12 @@
+name: customer-service
+displayName: Customer Service Agent
+description: >-
+  AI-powered customer service agent for a home & garden retailer. Handles
+  product selection, order management, service scheduling, and personalized
+  recommendations.
+industry: customer-support
+tags:
+  - customer-service
+  - retail
+  - support
+  - multi-agent

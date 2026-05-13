@@ -1,0 +1,12 @@
+name: blog-writer
+displayName: Blog Writer Agent
+description: >-
+  A multi-agent system that helps create technical blog posts, with sub-agents
+  for planning, writing, editing, and social media promotion.
+industry: content
+tags:
+  - writing
+  - blog
+  - content-creation
+  - multi-agent
+  - social-media
