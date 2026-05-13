@@ -125,11 +125,21 @@ Follow this structure:
 #!/bin/bash
 set -e
 
-PROJECT_ID="${1:?Usage: bash setup.sh <PROJECT_ID> [REGION]}"
-REGION="${2:-us-central1}"
+# Parse arguments
+CLEANUP=false
+POSITIONAL=()
+for arg in "$@"; do
+  case $arg in
+    --cleanup) CLEANUP=true ;;
+    *) POSITIONAL+=("$arg") ;;
+  esac
+done
 
-if [ "$2" = "--cleanup" ] || [ "$3" = "--cleanup" ]; then
-    echo "Cleaning up resources..."
+PROJECT_ID="${POSITIONAL[0]:?Usage: bash setup.sh <PROJECT_ID> [REGION] [--cleanup]}"
+REGION="${POSITIONAL[1]:-us-central1}"
+
+if [ "$CLEANUP" = true ]; then
+    echo "Cleaning up resources in project: $PROJECT_ID"
     # cleanup commands
     exit 0
 fi
