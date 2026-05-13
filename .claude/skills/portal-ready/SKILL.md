@@ -1,8 +1,8 @@
 ---
 name: portal-ready
-description: Prepare an ADK agent project for Agent Portal. Generates agent.yaml metadata, scans for GCP dependencies, checks or generates setup.sh, and runs agents-cli scaffold enhance. Use when a developer wants to make their agent deployable via Agent Portal.
+description: Prepare an ADK agent project for Agent Portal. Generates agent.yaml metadata, scans for GCP dependencies, checks or generates setup.sh, and runs agent-starter-pack enhance. Use when a developer wants to make their agent deployable via Agent Portal.
 disable-model-invocation: true
-allowed-tools: Bash(grep *) Bash(find *) Bash(cat *) Bash(ls *) Bash(uvx *) Bash(agents-cli *)
+allowed-tools: Bash(grep *) Bash(find *) Bash(cat *) Bash(ls *) Bash(uvx *)
 ---
 
 # Prepare Agent for Portal
@@ -167,12 +167,12 @@ deployment_targets = ["agent_engine"]
 
 Show the developer what will be added and confirm.
 
-## Step 6: Run agents-cli scaffold enhance
+## Step 6: Run agent-starter-pack enhance
 
 Run the following command to add deployment infrastructure:
 
 ```bash
-uvx google-agents-cli scaffold enhance --agent-directory <agent_dir> --deployment-target agent_runtime -s --yes
+uvx agent-starter-pack enhance --agent-directory <agent_dir> --deployment-target agent_engine -s --yes
 ```
 
 Show the output to the developer.
@@ -195,7 +195,7 @@ Present a summary:
 ✓ agent.py — has root_agent
 ✓ pyproject.toml — has ASP config
 ✓ setup.sh — resource setup script (if applicable)
-✓ agents-cli enhance — deployment files added
+✓ agent-starter-pack enhance — deployment files added
 
 Your agent is ready for Agent Portal!
 
