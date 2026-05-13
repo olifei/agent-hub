@@ -1,0 +1,10 @@
+name: invoice-processing
+displayName: Invoice Processing Agent
+description: >-
+  Unified inference and learning agent for automated invoice processing, extraction, and validation.
+industry: finance
+tags:
+  - finance
+  - invoice
+  - document-processing
+  - automation

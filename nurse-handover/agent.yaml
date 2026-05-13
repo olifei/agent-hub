@@ -1,0 +1,10 @@
+name: nurse-handover
+displayName: Nurse Handover Agent
+description: >-
+  Generates structured nurse shift handover reports, summarizing patient status, medications, and care notes.
+industry: healthcare
+tags:
+  - healthcare
+  - nursing
+  - handover
+  - reports

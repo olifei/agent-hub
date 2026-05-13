@@ -1,0 +1,10 @@
+name: academic-research
+displayName: Academic Research Agent
+description: >-
+  Multi-agent research assistant that helps explore academic topics, find papers, and synthesize findings.
+industry: education
+tags:
+  - research
+  - academic
+  - papers
+  - multi-agent

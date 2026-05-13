@@ -1,0 +1,10 @@
+name: travel-concierge
+displayName: Travel Concierge Agent
+description: >-
+  Orchestrates personalized travel experiences with sub-agents for flights, hotels, activities, and itinerary planning.
+industry: travel
+tags:
+  - travel
+  - booking
+  - itinerary
+  - multi-agent
