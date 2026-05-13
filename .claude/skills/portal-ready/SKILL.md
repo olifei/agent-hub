@@ -162,9 +162,9 @@ Present the generated setup.sh and ask the developer to confirm before writing.
 
 If no GCP services or data dependencies were detected, skip this step.
 
-## Step 5: Ensure pyproject.toml has ASP configuration
+## Step 5: Ensure pyproject.toml has required configuration
 
-Check if pyproject.toml contains `[tool.agent-starter-pack]`. If not, add:
+Check if pyproject.toml contains both `[tool.agent-starter-pack]` and `[tool.agents-cli]`. Add whichever is missing:
 
 ```toml
 [tool.agent-starter-pack]
@@ -173,6 +173,12 @@ base_template = "adk"
 [tool.agent-starter-pack.settings]
 agent_directory = "<detected_agent_directory>"
 deployment_targets = ["agent_engine"]
+
+[tool.agents-cli]
+agent_directory = "<detected_agent_directory>"
+
+[tool.agents-cli.create_params]
+deployment_target = "agent_runtime"
 ```
 
 Show the developer what will be added and confirm.
@@ -206,12 +212,16 @@ if [ -f setup.sh ]; then
     bash setup.sh "$PROJECT_ID" "$REGION"
 fi
 
-# Install dependencies and deploy
+# Install dependencies
 echo "Installing dependencies..."
-make install
+uv sync
+uv pip install google-agents-cli --python .venv/bin/python
 
+# Deploy to Agent Engine
 echo "Deploying to Agent Engine..."
-GOOGLE_CLOUD_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_LOCATION="$REGION" make backend
+gcloud config set project "$PROJECT_ID"
+GOOGLE_CLOUD_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_LOCATION="$REGION" \
+  .venv/bin/agents-cli deploy --project "$PROJECT_ID" --region "$REGION"
 
 echo "Deployment complete!"
 ```
