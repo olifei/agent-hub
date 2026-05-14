@@ -1,7 +1,10 @@
 name: nurse-handover
-displayName: Nurse Handover Agent
-description: >-
-  Generates structured nurse shift handover reports, summarizing patient status, medications, and care notes.
+displayName:
+  zh: 护士交班 Agent
+  en: Nurse Handover Agent
+description:
+  zh: 生成结构化的护士交班报告，汇总患者状态、用药情况和护理记录。
+  en: Generates structured nurse shift handover reports, summarizing patient status, medications, and care notes.
 industry: healthcare
 tags:
   - healthcare

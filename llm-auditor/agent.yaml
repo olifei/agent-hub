@@ -1,8 +1,10 @@
 name: llm-auditor
-displayName: LLM Auditor Agent
-description: >-
-  Automated fact-checking agent that evaluates LLM-generated responses, verifies
-  factual accuracy using web search, and rewrites content to correct inaccuracies.
+displayName:
+  zh: LLM 审核 Agent
+  en: LLM Auditor Agent
+description:
+  zh: 自动化事实核查 Agent，评估 LLM 生成的回答，通过网络搜索验证准确性，并纠正不实内容。
+  en: Automated fact-checking agent that evaluates LLM-generated responses, verifies factual accuracy using web search, and rewrites content to correct inaccuracies.
 industry: technology
 tags:
   - fact-checking

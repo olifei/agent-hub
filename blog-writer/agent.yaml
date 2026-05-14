@@ -1,8 +1,10 @@
 name: blog-writer
-displayName: Blog Writer Agent
-description: >-
-  A multi-agent system that helps create technical blog posts, with sub-agents
-  for planning, writing, editing, and social media promotion.
+displayName:
+  zh: 博客写作 Agent
+  en: Blog Writer Agent
+description:
+  zh: 多 Agent 协作系统，帮助创建技术博客文章，包含规划、写作、编辑和社交媒体推广等子 Agent。
+  en: A multi-agent system that helps create technical blog posts, with sub-agents for planning, writing, editing, and social media promotion.
 industry: content
 tags:
   - writing

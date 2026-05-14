@@ -1,7 +1,10 @@
 name: travel-concierge
-displayName: Travel Concierge Agent
-description: >-
-  Orchestrates personalized travel experiences with sub-agents for flights, hotels, activities, and itinerary planning.
+displayName:
+  zh: 旅行管家 Agent
+  en: Travel Concierge Agent
+description:
+  zh: 个性化旅行体验编排 Agent，包含航班、酒店、活动和行程规划等子 Agent。
+  en: Orchestrates personalized travel experiences with sub-agents for flights, hotels, activities, and itinerary planning.
 industry: travel
 tags:
   - travel

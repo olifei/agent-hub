@@ -1,7 +1,10 @@
 name: academic-research
-displayName: Academic Research Agent
-description: >-
-  Multi-agent research assistant that helps explore academic topics, find papers, and synthesize findings.
+displayName:
+  zh: 学术研究 Agent
+  en: Academic Research Agent
+description:
+  zh: 多 Agent 研究助手，帮助探索学术课题、检索论文和综合研究成果。
+  en: Multi-agent research assistant that helps explore academic topics, find papers, and synthesize findings.
 industry: education
 tags:
   - research

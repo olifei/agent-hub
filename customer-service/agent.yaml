@@ -1,9 +1,10 @@
 name: customer-service
-displayName: Customer Service Agent
-description: >-
-  AI-powered customer service agent for a home & garden retailer. Handles
-  product selection, order management, service scheduling, and personalized
-  recommendations.
+displayName:
+  zh: 客户服务 Agent
+  en: Customer Service Agent
+description:
+  zh: 面向家居和园艺零售商的 AI 客服 Agent，处理产品选择、订单管理、服务预约和个性化推荐。
+  en: AI-powered customer service agent for a home & garden retailer. Handles product selection, order management, service scheduling, and personalized recommendations.
 industry: customer-support
 tags:
   - customer-service

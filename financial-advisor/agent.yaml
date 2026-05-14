@@ -1,8 +1,10 @@
 name: financial-advisor
-displayName: Financial Advisor Agent
-description: >-
-  AI-driven financial advisor with sub-agents for data analysis, risk assessment,
-  trade execution, and portfolio management.
+displayName:
+  zh: 金融顾问 Agent
+  en: Financial Advisor Agent
+description:
+  zh: AI 金融顾问，包含数据分析、风险评估、交易执行和投资组合管理等子 Agent。
+  en: AI-driven financial advisor with sub-agents for data analysis, risk assessment, trade execution, and portfolio management.
 industry: finance
 tags:
   - finance
