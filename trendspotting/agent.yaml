@@ -1,0 +1,16 @@
+name: trendspotting
+displayName:
+  zh: 趋势洞察 Agent
+  en: Trendspotting Agent
+description:
+  zh: 分析市场数据和社交媒体，发现行业趋势和消费者偏好变化，为营销策略提供数据驱动的洞察。
+  en: Analyzes market data and social media to discover industry trends and consumer preference shifts, providing data-driven insights for marketing strategies.
+industry: retail
+tags:
+  - retail
+  - trends
+  - market-analysis
+  - data-driven
+storyline: retail
+storylineOrder: 1
+status: coming-soon

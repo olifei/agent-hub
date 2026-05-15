@@ -1,0 +1,107 @@
+retail:
+  title:
+    zh: 零售智能营销
+    en: Retail Smart Marketing
+  description:
+    zh: 从趋势发现到内容创作再到合规审核，AI Agent 全流程自动化零售营销。
+    en: From trend discovery to content creation to compliance review, AI agents automate the full retail marketing workflow.
+  scenario:
+    zh: 一家零售品牌需要快速响应市场趋势，生成符合品牌调性的营销内容，并确保内容合规后发布。传统方式需要多个团队协作数天，而 Agent 工作流可以在几分钟内完成。
+    en: A retail brand needs to quickly respond to market trends, generate on-brand marketing content, and ensure compliance before publishing. Traditional workflows take days across multiple teams — this Agent workflow completes in minutes.
+  agents:
+    - trendspotting
+    - creative
+    - smartcat
+  flow:
+    - from: trendspotting
+      to: creative
+      label:
+        zh: 趋势洞察
+        en: Trend Insights
+    - from: creative
+      to: smartcat
+      label:
+        zh: 创意内容
+        en: Creative Content
+    - from: smartcat
+      to: creative
+      label:
+        zh: 审核不通过，重新生成
+        en: Review Failed, Regenerate
+      type: feedback
+    - from: smartcat
+      to: null
+      label:
+        zh: 审核通过，发布
+        en: Approved, Publish
+      type: success
+
+finance:
+  title:
+    zh: 金融投资分析
+    en: Financial Investment Analysis
+  description:
+    zh: AI 驱动的金融顾问，提供数据分析、风险评估和投资组合管理。
+    en: AI-driven financial advisor providing data analysis, risk assessment, and portfolio management.
+  agents:
+    - financial-advisor
+
+customer-support:
+  title:
+    zh: 智能客户服务
+    en: Smart Customer Service
+  description:
+    zh: AI 客服 Agent 处理产品咨询、订单管理和个性化推荐。
+    en: AI customer service agent handling product inquiries, order management, and personalized recommendations.
+  agents:
+    - customer-service
+
+technology:
+  title:
+    zh: 内容质量保障
+    en: Content Quality Assurance
+  description:
+    zh: 自动化事实核查，验证 LLM 生成内容的准确性。
+    en: Automated fact-checking to verify the accuracy of LLM-generated content.
+  agents:
+    - llm-auditor
+
+travel:
+  title:
+    zh: 个性化旅行规划
+    en: Personalized Travel Planning
+  description:
+    zh: AI 旅行管家编排个性化旅行体验，涵盖航班、酒店和活动。
+    en: AI travel concierge orchestrating personalized travel experiences covering flights, hotels, and activities.
+  agents:
+    - travel-concierge
+
+healthcare:
+  title:
+    zh: 医疗护理交班
+    en: Healthcare Nurse Handover
+  description:
+    zh: 自动生成结构化的护士交班报告，提升护理交接效率。
+    en: Automatically generates structured nurse handover reports, improving care transition efficiency.
+  agents:
+    - nurse-handover
+
+content:
+  title:
+    zh: 技术内容创作
+    en: Technical Content Creation
+  description:
+    zh: 多 Agent 协作创作技术博客文章，从规划到发布全流程。
+    en: Multi-agent collaboration for technical blog writing, from planning to publishing.
+  agents:
+    - blog-writer
+
+education:
+  title:
+    zh: 学术研究辅助
+    en: Academic Research Assistant
+  description:
+    zh: 多 Agent 研究助手，帮助检索论文、探索课题和综合研究成果。
+    en: Multi-agent research assistant for paper retrieval, topic exploration, and research synthesis.
+  agents:
+    - academic-research

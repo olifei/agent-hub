@@ -1,0 +1,16 @@
+name: smartcat
+displayName:
+  zh: SmartCat 审核 Agent
+  en: SmartCat Agent
+description:
+  zh: 对营销内容进行合规审核和品牌一致性检查，同时提供市场洞察反馈，确保内容质量和合规性。
+  en: Reviews marketing content for compliance and brand consistency, provides market insight feedback, ensuring content quality and regulatory compliance.
+industry: retail
+tags:
+  - retail
+  - compliance
+  - content-review
+  - market-insights
+storyline: retail
+storylineOrder: 3
+status: coming-soon
