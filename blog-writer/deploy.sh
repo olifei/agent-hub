@@ -60,19 +60,24 @@ if [ -n "$GE_APP_ID" ] && [ -n "$REASONING_ENGINE_ID" ]; then
     PROJECT_NUM=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
     ACCESS_TOKEN=$(gcloud auth print-access-token)
 
-    # Get agent display name from agent.yaml if available
+    # Get agent display name and description from agent.yaml if available
     AGENT_NAME="$(basename $(pwd))"
     if command -v python3 &>/dev/null && [ -f agent.yaml ]; then
         DISPLAY_NAME=$(python3 -c "
-import yaml, sys
-try:
-    d = yaml.safe_load(open('agent.yaml'))
-    dn = d.get('displayName', {})
-    print(dn.get('en', dn) if isinstance(dn, dict) else dn)
-except: print('$AGENT_NAME')
+import yaml
+d = yaml.safe_load(open('agent.yaml'))
+dn = d.get('displayName', {})
+print(dn.get('en', dn) if isinstance(dn, dict) else dn)
 " 2>/dev/null || echo "$AGENT_NAME")
+        AGENT_DESC=$(python3 -c "
+import yaml
+d = yaml.safe_load(open('agent.yaml'))
+desc = d.get('description', {})
+print(desc.get('en', desc) if isinstance(desc, dict) else desc)
+" 2>/dev/null || echo "$DISPLAY_NAME")
     else
         DISPLAY_NAME="$AGENT_NAME"
+        AGENT_DESC="$AGENT_NAME"
     fi
 
     REGISTER_RESPONSE=$(curl -s -X POST \
@@ -82,9 +87,10 @@ except: print('$AGENT_NAME')
       -H "X-Goog-User-Project: ${PROJECT_NUM}" \
       -d "{
         \"displayName\": \"${DISPLAY_NAME}\",
+        \"description\": \"${AGENT_DESC}\",
         \"adk_agent_definition\": {
           \"tool_settings\": {
-            \"tool_description\": \"${DISPLAY_NAME}\"
+            \"tool_description\": \"${AGENT_DESC}\"
           },
           \"provisioned_reasoning_engine\": {
             \"reasoning_engine\": \"projects/${PROJECT_NUM}/locations/${REGION}/reasoningEngines/${REASONING_ENGINE_ID}\"
