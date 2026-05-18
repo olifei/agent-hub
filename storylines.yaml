@@ -10,16 +10,16 @@ retail:
     en: A retail brand needs to quickly respond to market trends, generate on-brand marketing content, and ensure compliance before publishing. Traditional workflows take days across multiple teams — this Agent workflow completes in minutes.
   agents:
     - trendspotting
-    - youtubuddy
+    - youbuddy
     - creative
     - smartcat
   flow:
     - from: trendspotting
-      to: youtubuddy
+      to: youbuddy
       label:
         zh: 市场趋势
         en: Market Trends
-    - from: youtubuddy
+    - from: youbuddy
       to: creative
       label:
         zh: 趋势洞察 + 视频分析
