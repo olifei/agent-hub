@@ -3,14 +3,15 @@ displayName:
   zh: YouBuddy 视频分析 Agent
   en: YouBuddy Agent
 description:
-  zh: 研究分析 YouTube 视频内容和趋势，提取热门话题、受众偏好和内容策略洞察，为营销决策提供数据支持。
-  en: Analyzes YouTube video content and trends, extracting popular topics, audience preferences, and content strategy insights to support marketing decisions.
+  zh: 基于 Gemini 的 YouTube 分析助手，能够搜索视频、分析频道表现、评估观众互动和情感，并生成交互式可视化图表。支持趋势分析、竞品研究和受众反馈分析。
+  en: A Gemini-powered YouTube analytics assistant that searches videos, analyzes channel performance, evaluates audience engagement and sentiment, and generates interactive visualizations. Supports trend analysis, competitor research, and audience feedback analysis.
 industry: retail
 tags:
-  - retail
   - youtube
-  - video-analysis
-  - trends
-  - market-research
+  - analytics
+  - visualization
+  - sentiment-analysis
+  - marketing
+  - retail
 storyline: retail
 storylineOrder: 2
