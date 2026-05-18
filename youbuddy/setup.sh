@@ -58,8 +58,7 @@ if gsutil ls -b "gs://${BUCKET_NAME}" &>/dev/null; then
     echo "  Bucket already exists, skipping."
 else
     gsutil mb -p "$PROJECT_ID" -l "$REGION" "gs://${BUCKET_NAME}"
-    gsutil iam ch allUsers:objectViewer "gs://${BUCKET_NAME}"
-    echo "  Bucket created with public read access."
+    echo "  Bucket created."
 fi
 
 # ---- Write .env ----
