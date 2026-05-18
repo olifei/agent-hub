@@ -62,7 +62,7 @@ Content from Creative Agent → Multi-layer Review → Decision
 SmartCat is the final step in the retail marketing workflow. It reviews content from **Creative Agent** and either approves for publication or sends back for revision:
 
 ```
-Trendspotting → YouTuBuddy → Creative → SmartCat → Publish
+Trendspotting → YouBuddy → Creative → SmartCat → Publish
                                 ↑            │
                                 └── Revise ──┘
 ```

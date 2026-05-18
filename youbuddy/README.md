@@ -1,8 +1,8 @@
-# YouTuBuddy Agent
+# YouBuddy Agent
 
 ## Overview
 
-YouTuBuddy is an AI-powered YouTube video analysis agent that extracts actionable insights from video content, comments, and channel performance data. In the retail marketing workflow, it bridges trend discovery and content creation by analyzing how trends manifest in video content and what resonates with audiences.
+YouBuddy is an AI-powered YouTube video analysis agent that extracts actionable insights from video content, comments, and channel performance data. In the retail marketing workflow, it bridges trend discovery and content creation by analyzing how trends manifest in video content and what resonates with audiences.
 
 ## Key Features
 
@@ -45,10 +45,10 @@ YouTube Data API → Video Collection → Content Analysis → Audience Insights
 
 ## Integration
 
-YouTuBuddy receives trend data from **Trendspotting Agent** and feeds analyzed insights to **Creative Agent**:
+YouBuddy receives trend data from **Trendspotting Agent** and feeds analyzed insights to **Creative Agent**:
 
 ```
-Trendspotting → YouTuBuddy → Creative → SmartCat → Publish
+Trendspotting → YouBuddy → Creative → SmartCat → Publish
                    ↑
             YouTube Data API
 ```

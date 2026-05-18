@@ -44,10 +44,10 @@ The agent uses a multi-source data fusion approach:
 
 ## Integration
 
-This agent feeds its output directly to the **YouTuBuddy Agent** and **Creative Agent** in the retail marketing workflow:
+This agent feeds its output directly to the **YouBuddy Agent** and **Creative Agent** in the retail marketing workflow:
 
 ```
-Trendspotting → YouTuBuddy → Creative → SmartCat → Publish
+Trendspotting → YouBuddy → Creative → SmartCat → Publish
 ```
 
 ## Example Usage

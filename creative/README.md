@@ -17,13 +17,13 @@ The Creative Agent automatically generates marketing content based on trend insi
 ```
 Trend Insights + Video Analysis → Content Strategy → Draft Generation → Multi-format Output
          (from Trendspotting          │                                        │
-          & YouTuBuddy)        Brand Guidelines                      → To SmartCat
+          & YouBuddy)        Brand Guidelines                      → To SmartCat
                                Audience Profile                        for review
 ```
 
 ### Input
 - Trend insights (from Trendspotting Agent)
-- Video content analysis (from YouTuBuddy Agent)
+- Video content analysis (from YouBuddy Agent)
 - Brand guidelines and tone of voice
 - Target audience profile
 - Campaign objectives
@@ -48,10 +48,10 @@ Trend Insights + Video Analysis → Content Strategy → Draft Generation → Mu
 
 ## Integration
 
-Creative Agent receives insights from **Trendspotting** and **YouTuBuddy**, and sends generated content to **SmartCat** for compliance review:
+Creative Agent receives insights from **Trendspotting** and **YouBuddy**, and sends generated content to **SmartCat** for compliance review:
 
 ```
-Trendspotting → YouTuBuddy → Creative → SmartCat → Publish
+Trendspotting → YouBuddy → Creative → SmartCat → Publish
                                 ↑            │
                                 └── Revise ──┘
 ```

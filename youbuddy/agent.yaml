@@ -1,7 +1,7 @@
 name: youbuddy
 displayName:
-  zh: YouTuBuddy 视频分析 Agent
-  en: YouTuBuddy Agent
+  zh: YouBuddy 视频分析 Agent
+  en: YouBuddy Agent
 description:
   zh: 研究分析 YouTube 视频内容和趋势，提取热门话题、受众偏好和内容策略洞察，为营销决策提供数据支持。
   en: Analyzes YouTube video content and trends, extracting popular topics, audience preferences, and content strategy insights to support marketing decisions.
@@ -14,4 +14,3 @@ tags:
   - market-research
 storyline: retail
 storylineOrder: 2
-status: coming-soon
