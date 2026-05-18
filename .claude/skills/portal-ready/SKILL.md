@@ -1,6 +1,6 @@
 ---
 name: portal-ready
-description: Prepare an ADK agent project for Agent Portal. Generates agent.yaml metadata, scans for GCP dependencies, checks or generates setup.sh, and runs agents-cli scaffold enhance. Use when a developer wants to make their agent deployable via Agent Portal.
+description: Prepare an ADK agent project for Agent Portal. Generates agent.yaml metadata, scans for GCP dependencies, checks or generates setup.sh, generates deploy.sh with optional Gemini Enterprise support, and runs agents-cli scaffold enhance. Use when a developer wants to make their agent deployable via Agent Portal.
 disable-model-invocation: true
 allowed-tools: Bash(grep *) Bash(find *) Bash(cat *) Bash(ls *) Bash(uvx *)
 ---
@@ -21,14 +21,20 @@ If you cannot find an agent.py with a `root_agent` definition, stop and tell the
 
 ## Step 2: Generate agent.yaml
 
-Based on your analysis, generate an `agent.yaml` file with these fields:
+Based on your analysis, generate an `agent.yaml` file with bilingual fields:
 
 ```yaml
 name: <kebab-case name>
-displayName: <human readable name>
-description: <2-3 sentence description of what the agent does>
+displayName:
+  zh: <中文显示名>
+  en: <English display name>
+description:
+  zh: <中文描述，2-3句>
+  en: <English description, 2-3 sentences>
 industry: <one of: content, customer-support, finance, technology, retail, healthcare, manufacturing, logistics, energy, telecom, education, government>
-tags: <list of relevant tags>
+tags:
+  - <tag1>
+  - <tag2>
 ```
 
 Present the generated agent.yaml to the developer and ask them to confirm or suggest changes. Only write the file after confirmation.
@@ -51,21 +57,7 @@ Scan ALL Python files in the project for usage of GCP services. Look for:
 
 Also check `.env.example`, `.env`, config files, and seed data directories (CSV, SQL, JSON files) for service and data references.
 
-Present your findings:
-
-```
-GCP Services detected:
-  ✓ Cloud Storage — found in tools/data_loader.py
-  ✓ BigQuery — found in agent.py, sub_agents/analyst.py
-
-External dependencies:
-  ✓ FRED_API_KEY — found in .env.example
-
-Seed data:
-  ✓ data/flights.csv — likely for BigQuery
-```
-
-Ask the developer: "Are there any services or data dependencies I missed?"
+Present your findings and ask the developer: "Are there any services or data dependencies I missed?"
 
 ## Step 4: Check or generate setup.sh
 
@@ -90,75 +82,11 @@ Read the script and check against this checklist:
 | Cost warning | Mentions that paid resources will be created |
 | Idempotent | Handles already-existing resources gracefully (skip or update, not fail) |
 
-Present results:
-
-```
-setup.sh validation:
-  ✓ PROJECT_ID parameterized
-  ✓ No sensitive info
-  ✗ Missing API enablement for bigquery.googleapis.com
-  ✗ No cleanup support
-  ✓ Error handling (set -e)
-  ...
-```
-
 Ask the developer to fix any issues found.
 
 ### If setup.sh does not exist
 
-If GCP services or seed data were detected in Step 3, generate a `setup.sh` that:
-
-- Accepts `PROJECT_ID` as first argument, `REGION` as optional second (default: us-central1)
-- Supports `--cleanup` flag
-- Has `set -e` for error handling
-- Prints a cost warning at the start
-- Enables required APIs
-- Creates detected GCP resources (BigQuery datasets, GCS buckets, etc.)
-- Loads seed data if present in the repo
-- Sets up IAM roles
-- Outputs resource info for `.env`
-- Is idempotent
-
-Follow this structure:
-
-```bash
-#!/bin/bash
-set -e
-
-# Parse arguments
-CLEANUP=false
-POSITIONAL=()
-for arg in "$@"; do
-  case $arg in
-    --cleanup) CLEANUP=true ;;
-    *) POSITIONAL+=("$arg") ;;
-  esac
-done
-
-PROJECT_ID="${POSITIONAL[0]:?Usage: bash setup.sh <PROJECT_ID> [REGION] [--cleanup]}"
-REGION="${POSITIONAL[1]:-us-central1}"
-
-if [ "$CLEANUP" = true ]; then
-    echo "Cleaning up resources in project: $PROJECT_ID"
-    # cleanup commands
-    exit 0
-fi
-
-echo "This will create paid GCP resources in project: $PROJECT_ID"
-read -p "Continue? (y/N): " confirm
-[ "$confirm" = "y" ] || exit 0
-
-echo "[1/N] Enabling APIs..."
-echo "[2/N] Creating resources..."
-echo "[3/N] Loading seed data..."
-echo "[4/N] Setting up IAM..."
-
-echo "Done! Resource info:"
-echo "  DATASET_ID=..."
-echo "  BUCKET_NAME=..."
-```
-
-Present the generated setup.sh and ask the developer to confirm before writing.
+If GCP services or seed data were detected in Step 3, generate a `setup.sh` following the standard template with argument parsing, cleanup support, and idempotent operations.
 
 If no GCP services or data dependencies were detected, skip this step.
 
@@ -195,16 +123,34 @@ Show the output to the developer.
 
 ## Step 7: Generate deploy.sh
 
-Create a `deploy.sh` in the project root that customers use for one-click deployment:
+Create a `deploy.sh` in the project root. All agents must support both Agent Engine and Gemini Enterprise deployment via the `--ge APP_ID` option:
 
 ```bash
 #!/bin/bash
 set -e
 
-PROJECT_ID="${1:?Usage: bash deploy.sh <PROJECT_ID> [REGION]}"
-REGION="${2:-us-central1}"
+# Parse arguments
+GE_APP_ID=""
+POSITIONAL=()
+for arg in "$@"; do
+  case $arg in
+    --ge=*) GE_APP_ID="${arg#*=}" ;;
+    --ge) GE_APP_ID="__NEXT__" ;;
+    *)
+      if [ "$GE_APP_ID" = "__NEXT__" ]; then
+        GE_APP_ID="$arg"
+      else
+        POSITIONAL+=("$arg")
+      fi
+      ;;
+  esac
+done
+
+PROJECT_ID="${POSITIONAL[0]:?Usage: bash deploy.sh <PROJECT_ID> [REGION] [--ge APP_ID]}"
+REGION="${POSITIONAL[1]:-us-central1}"
 
 echo "Deploying agent to project: $PROJECT_ID (region: $REGION)"
+[ -n "$GE_APP_ID" ] && echo "  + Gemini Enterprise registration (APP_ID: $GE_APP_ID)"
 
 # Create GCP resources if setup.sh exists
 if [ -f setup.sh ]; then
@@ -220,11 +166,75 @@ uv pip install google-agents-cli --python .venv/bin/python
 # Deploy to Agent Engine
 echo "Deploying to Agent Engine..."
 gcloud config set project "$PROJECT_ID"
-GOOGLE_CLOUD_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_LOCATION="$REGION" \
-  .venv/bin/agents-cli deploy --project "$PROJECT_ID" --region "$REGION"
+DEPLOY_OUTPUT=$(GOOGLE_CLOUD_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_LOCATION="$REGION" \
+  .venv/bin/agents-cli deploy --project "$PROJECT_ID" --region "$REGION" 2>&1 | tee /dev/stderr)
 
+# Extract reasoning engine ID
+REASONING_ENGINE_ID=$(echo "$DEPLOY_OUTPUT" | grep -oP 'reasoningEngines/\K\d+' | tail -1)
+
+echo ""
+echo "Agent Engine deployment complete!"
+[ -n "$REASONING_ENGINE_ID" ] && echo "  Reasoning Engine ID: $REASONING_ENGINE_ID"
+
+# Register to Gemini Enterprise if --ge flag provided
+if [ -n "$GE_APP_ID" ] && [ -n "$REASONING_ENGINE_ID" ]; then
+    echo ""
+    echo "Registering agent to Gemini Enterprise..."
+
+    PROJECT_NUM=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
+    ACCESS_TOKEN=$(gcloud auth print-access-token)
+
+    # Get agent info from agent.yaml
+    AGENT_NAME="$(basename $(pwd))"
+    if command -v python3 &>/dev/null && [ -f agent.yaml ]; then
+        DISPLAY_NAME=$(python3 -c "
+import yaml
+d = yaml.safe_load(open('agent.yaml'))
+dn = d.get('displayName', {})
+print(dn.get('en', dn) if isinstance(dn, dict) else dn)
+" 2>/dev/null || echo "$AGENT_NAME")
+        AGENT_DESC=$(python3 -c "
+import yaml
+d = yaml.safe_load(open('agent.yaml'))
+desc = d.get('description', {})
+print(desc.get('en', desc) if isinstance(desc, dict) else desc)
+" 2>/dev/null || echo "$DISPLAY_NAME")
+    else
+        DISPLAY_NAME="$AGENT_NAME"
+        AGENT_DESC="$AGENT_NAME"
+    fi
+
+    REGISTER_RESPONSE=$(curl -s -X POST \
+      "https://discoveryengine.googleapis.com/v1alpha/projects/${PROJECT_NUM}/locations/global/collections/default_collection/engines/${GE_APP_ID}/assistants/default_assistant/agents" \
+      -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+      -H "Content-Type: application/json" \
+      -H "X-Goog-User-Project: ${PROJECT_NUM}" \
+      -d "{
+        \"displayName\": \"${DISPLAY_NAME}\",
+        \"description\": \"${AGENT_DESC}\",
+        \"adk_agent_definition\": {
+          \"tool_settings\": {
+            \"tool_description\": \"${AGENT_DESC}\"
+          },
+          \"provisioned_reasoning_engine\": {
+            \"reasoning_engine\": \"projects/${PROJECT_NUM}/locations/${REGION}/reasoningEngines/${REASONING_ENGINE_ID}\"
+          }
+        }
+      }")
+
+    if echo "$REGISTER_RESPONSE" | grep -q '"name"'; then
+        echo "Gemini Enterprise registration successful!"
+        echo "$REGISTER_RESPONSE" | python3 -m json.tool 2>/dev/null || echo "$REGISTER_RESPONSE"
+    else
+        echo "Gemini Enterprise registration failed:"
+        echo "$REGISTER_RESPONSE" | python3 -m json.tool 2>/dev/null || echo "$REGISTER_RESPONSE"
+    fi
+fi
+
+echo ""
 echo "Deployment complete!"
 ```
+
 
 Present to developer and confirm before writing.
 
@@ -243,10 +253,10 @@ grep "agent-starter-pack" pyproject.toml
 Present a summary:
 
 ```
-✓ agent.yaml — metadata for Portal
-✓ deploy.sh — one-click deployment script
+✓ agent.yaml — metadata for Portal (bilingual)
+✓ deploy.sh — one-click deployment script (with/without GE support)
 ✓ agent.py — has root_agent
-✓ pyproject.toml — has ASP config
+✓ pyproject.toml — has ASP + agents-cli config
 ✓ setup.sh — resource setup script (if applicable)
 ✓ agents-cli enhance — deployment files added
 
@@ -255,7 +265,8 @@ Your agent is ready for Agent Portal!
 Customer deployment flow:
   git clone https://github.com/olifei/agent-hub
   cd agent-hub/<agent-name>
-  bash deploy.sh <PROJECT_ID>
+  bash deploy.sh <PROJECT_ID>                    # Agent Engine only
+  bash deploy.sh <PROJECT_ID> --ge <APP_ID>      # Agent Engine + Gemini Enterprise
 
 Next: submit a PR to https://github.com/olifei/agent-hub
 ```
