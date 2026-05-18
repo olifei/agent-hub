@@ -92,3 +92,7 @@ youtube_agent = Agent(
 )
 
 root_agent = youtube_agent
+
+from google.adk.apps import App
+
+app = App(root_agent=root_agent, name="youtube_analyst")
