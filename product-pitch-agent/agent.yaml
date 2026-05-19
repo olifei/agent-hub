@@ -1,0 +1,18 @@
+name: product-pitch-agent
+displayName:
+  zh: 产品广告创意 Agent
+  en: Product Pitch Director
+description:
+  zh: 将产品目录转化为广告图片和视频。通过 Gemini 图片生成、Veo 视频生成和内置质量评估器，自动化广告创意制作流程，支持用户审批和迭代优化。
+  en: Turns a product catalog into ad images and videos. Automates the creative production workflow with Gemini image generation, Veo video generation, and built-in quality evaluators, supporting user approval and iterative refinement.
+industry: retail
+tags:
+  - retail
+  - advertising
+  - video-generation
+  - image-generation
+  - creative
+  - gemini
+  - veo
+storyline: retail
+storylineOrder: 3

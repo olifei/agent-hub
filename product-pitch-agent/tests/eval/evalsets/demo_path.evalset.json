@@ -1,0 +1,36 @@
+{
+  "eval_set_id": "demo_path",
+  "name": "Demo A — happy path (conversational entry → image phase → approval gate)",
+  "description": "Single-product happy path used for the live demo. Verifies: conversational product entry routes through prepare_dataset, the image phase runs end-to-end via the deployed MCP, the agent reads pipeline evaluation_results, posts a completion message after wait_for_job returns, surfaces a review card, and stops at the approval gate (does NOT call batch_generate(mode='full')). Costs ~$0.10 per run (one image gen) and takes ~6 min.",
+  "eval_cases": [
+    {
+      "eval_id": "demo_a_image_only",
+      "conversation": [
+        {
+          "invocation_id": "inv_1",
+          "user_content": {
+            "parts": [{
+              "text": "I want to try out a single product before doing a full catalog. Add this to your dataset and generate one starting-frame image — 16:9, English. Pause before video.\n\n- product_id: EVAL-DEMO-001\n- product_name: Cozy Knit Reusable Shopping Tote Bag\n- country: United States\n- language: English\n- company_name: Demo Co\n- image_url: https://s.alicdn.com/@sc04/kf/H032f9dfef6ba4d12b6bce93c52d0bd70E.jpg?avif=close&webp=close\n- _category: eval_demo_tote_bags"
+            }]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {"name": "prepare_dataset", "args": {}},
+              {"name": "upload_dataset", "args": {}},
+              {"name": "list_products", "args": {"data_dir": "data/eval_demo_tote_bags"}},
+              {"name": "batch_generate", "args": {"mode": "image_only", "product_ids": ["EVAL-DEMO-001"], "aspect_ratio": "16:9"}},
+              {"name": "wait_for_job", "args": {}},
+              {"name": "get_product_assets", "args": {"product_id": "EVAL-DEMO-001"}},
+              {"name": "fetch_image_bytes", "args": {}}
+            ]
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "app",
+        "user_id": "eval_user",
+        "state": {}
+      }
+    }
+  ]
+}

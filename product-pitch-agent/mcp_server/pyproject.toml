@@ -1,0 +1,30 @@
+[project]
+name = "ads-video-mcp-server"
+version = "0.1.0"
+description = "MCP Server for Ads Video Generation Pipeline"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=1.9.0",
+    "pydantic-settings>=2.0",
+    "google-cloud-aiplatform>=1.60.0",
+    "google-cloud-storage>=2.14.0",
+    "google-genai>=1.0.0",
+    "loguru>=0.7.0",
+    "Pillow>=10.0",
+    "moviepy>=2.0",
+    "httpx>=0.27",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+ads-video-mcp = "mcp_server.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

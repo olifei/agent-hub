@@ -1,0 +1,31 @@
+{
+  "criteria": {
+    "rubric_based_final_response_quality_v1": {
+      "threshold": 0.8,
+      "judgeModelOptions": {
+        "judgeModel": "gemini-flash-latest",
+        "numSamples": 1
+      },
+      "rubrics": [
+        {
+          "rubricId": "review_card_present",
+          "rubricContent": {
+            "textProperty": "The final response presents a per-product review card containing: (1) a heading with the product_id and product_name, (2) the pipeline's per-criterion evaluation results (e.g. 'product_detail_preservation', 'character_realism_normality', etc.) with PASS/FAIL or check/cross indicators, and (3) for any FAILED criterion, a one-line reason taken from the metadata. The criteria values must be the actual ones the pipeline returned — not invented."
+          }
+        },
+        {
+          "rubricId": "stops_at_approval_gate",
+          "rubricContent": {
+            "textProperty": "The final response stops at the approval gate after the image phase. It must NOT have called batch_generate(mode='full') in this turn, and must explicitly invite the user to approve, redo, or skip before any video generation happens."
+          }
+        },
+        {
+          "rubricId": "completion_notification_present",
+          "rubricContent": {
+            "textProperty": "Immediately after the wait_for_job call returns, the response includes a clear completion line that names the job_id and the elapsed duration (e.g. 'Image job <id> done in <duration>'). Silence after a long-running job is not acceptable."
+          }
+        }
+      ]
+    }
+  }
+}

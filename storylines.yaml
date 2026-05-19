@@ -11,7 +11,7 @@ retail:
   agents:
     - trendspotting
     - youbuddy
-    - creative
+    - product-pitch-agent
     - smartcat
   flow:
     - from: trendspotting
@@ -20,17 +20,17 @@ retail:
         zh: 市场趋势
         en: Market Trends
     - from: youbuddy
-      to: creative
+      to: product-pitch-agent
       label:
         zh: 趋势洞察 + 视频分析
         en: Trend Insights + Video Analysis
-    - from: creative
+    - from: product-pitch-agent
       to: smartcat
       label:
         zh: 创意内容
         en: Creative Content
     - from: smartcat
-      to: creative
+      to: product-pitch-agent
       label:
         zh: 审核不通过，重新生成
         en: Review Failed, Regenerate
