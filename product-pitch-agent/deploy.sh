@@ -5,10 +5,9 @@ set -e
 # Product Pitch Agent — Full Deployment
 #
 # Architecture:
-#   1. setup.sh → GCS bucket, APIs, IAM, Artifact Registry
-#   2. MCP Server → Cloud Run (container build + deploy)
-#   3. Agent → Agent Engine (agents-cli deploy)
-#   4. (optional) → Gemini Enterprise registration
+#   1. MCP Server → Cloud Run (container build + deploy)
+#   2. Agent → Agent Engine (agents-cli deploy)
+#   3. (optional) → Gemini Enterprise registration
 #
 # Usage:
 #   bash deploy.sh <PROJECT_ID> [REGION] [--ge APP_ID]
@@ -34,8 +33,8 @@ PROJECT_ID="${POSITIONAL[0]:?Usage: bash deploy.sh <PROJECT_ID> [REGION] [--ge A
 REGION="${POSITIONAL[1]:-us-central1}"
 BUCKET_NAME="${PROJECT_ID}-pitch-agent-output"
 
-TOTAL_STEPS=3
-[ -n "$GE_APP_ID" ] && TOTAL_STEPS=4
+TOTAL_STEPS=2
+[ -n "$GE_APP_ID" ] && TOTAL_STEPS=3
 
 echo "═══════════════════════════════════════════════════════════"
 echo "  Product Pitch Agent — Full Deployment"
@@ -47,17 +46,19 @@ echo "  Bucket:   $BUCKET_NAME"
 echo "═══════════════════════════════════════════════════════════"
 echo ""
 
-# ── Step 1: Setup GCP resources ──────────────────────────────────────────────
+# ── Pre-flight: GCS bucket + AI Platform API ────────────────────────────────
 
-echo "▸ Step 1/${TOTAL_STEPS}: Setting up GCP resources..."
-if [ -f setup.sh ]; then
-    bash setup.sh "$PROJECT_ID" "$REGION"
+gcloud config set project "$PROJECT_ID"
+gcloud services enable aiplatform.googleapis.com storage.googleapis.com --project="$PROJECT_ID" --quiet
+
+if ! gsutil ls -b "gs://${BUCKET_NAME}" &>/dev/null; then
+    gsutil mb -p "$PROJECT_ID" -l "$REGION" "gs://${BUCKET_NAME}"
 fi
 
-# ── Step 2: Deploy MCP Server to Cloud Run ───────────────────────────────────
+# ── Step 1: Deploy MCP Server to Cloud Run ───────────────────────────────────
 
 echo ""
-echo "▸ Step 2/${TOTAL_STEPS}: Deploying MCP Server to Cloud Run..."
+echo "▸ Step 1/${TOTAL_STEPS}: Deploying MCP Server to Cloud Run..."
 echo "  (This builds a container and deploys — may take 3-5 minutes)"
 echo ""
 
@@ -69,21 +70,15 @@ MCP_SERVER_URL=$(gcloud run services describe ads-video-mcp-server \
 echo ""
 echo "  MCP Server URL: $MCP_SERVER_URL"
 
-# ── Step 3: Deploy Agent to Agent Engine ─────────────────────────────────────
+# ── Step 2: Deploy Agent to Agent Engine ─────────────────────────────────────
 
 echo ""
-echo "▸ Step 3/${TOTAL_STEPS}: Deploying Agent to Agent Engine..."
+echo "▸ Step 2/${TOTAL_STEPS}: Deploying Agent to Agent Engine..."
 echo ""
-
-export MCP_SERVER_URL="$MCP_SERVER_URL"
-export GCS_BUCKET_NAME="$BUCKET_NAME"
-export GOOGLE_CLOUD_PROJECT="$PROJECT_ID"
-export GOOGLE_CLOUD_LOCATION="$REGION"
 
 uv sync
 uv pip install google-agents-cli --python .venv/bin/python
 
-gcloud config set project "$PROJECT_ID"
 DEPLOY_OUTPUT=$(GOOGLE_CLOUD_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_LOCATION="$REGION" \
     MCP_SERVER_URL="$MCP_SERVER_URL" GCS_BUCKET_NAME="$BUCKET_NAME" \
     .venv/bin/agents-cli deploy --project "$PROJECT_ID" --region "$REGION" \
@@ -96,11 +91,11 @@ echo ""
 echo "  Agent Engine deployment complete!"
 [ -n "$REASONING_ENGINE_ID" ] && echo "  Reasoning Engine ID: $REASONING_ENGINE_ID"
 
-# ── Step 4: Register to Gemini Enterprise (optional) ─────────────────────────
+# ── Step 3: Register to Gemini Enterprise (optional) ─────────────────────────
 
 if [ -n "$GE_APP_ID" ] && [ -n "$REASONING_ENGINE_ID" ]; then
     echo ""
-    echo "▸ Step 4/${TOTAL_STEPS}: Registering to Gemini Enterprise..."
+    echo "▸ Step 3/${TOTAL_STEPS}: Registering to Gemini Enterprise..."
 
     PROJECT_NUM=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
     ACCESS_TOKEN=$(gcloud auth print-access-token)
@@ -150,7 +145,7 @@ print(desc.get('en', desc) if isinstance(desc, dict) else desc)
     fi
 elif [ -n "$GE_APP_ID" ] && [ -z "$REASONING_ENGINE_ID" ]; then
     echo ""
-    echo "▸ Step 4/${TOTAL_STEPS}: Skipped (Agent Engine deploy failed — no Reasoning Engine ID)"
+    echo "▸ Step 3/${TOTAL_STEPS}: Skipped (Agent Engine deploy failed — no Reasoning Engine ID)"
 fi
 
 echo ""
