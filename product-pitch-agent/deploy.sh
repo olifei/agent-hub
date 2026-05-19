@@ -86,7 +86,9 @@ uv pip install google-agents-cli --python .venv/bin/python
 gcloud config set project "$PROJECT_ID"
 DEPLOY_OUTPUT=$(GOOGLE_CLOUD_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_LOCATION="$REGION" \
     MCP_SERVER_URL="$MCP_SERVER_URL" GCS_BUCKET_NAME="$BUCKET_NAME" \
-    .venv/bin/agents-cli deploy --project "$PROJECT_ID" --region "$REGION" 2>&1 | tee /dev/stderr)
+    .venv/bin/agents-cli deploy --project "$PROJECT_ID" --region "$REGION" \
+    --update-env-vars "MCP_SERVER_URL=${MCP_SERVER_URL},GCS_BUCKET_NAME=${BUCKET_NAME}" \
+    2>&1 | tee /dev/stderr) || true
 
 REASONING_ENGINE_ID=$(echo "$DEPLOY_OUTPUT" | grep -oP 'reasoningEngines/\K\d+' | tail -1)
 
