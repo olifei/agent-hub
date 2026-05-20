@@ -55,6 +55,12 @@ if ! gsutil ls -b "gs://${BUCKET_NAME}" &>/dev/null; then
     gsutil mb -p "$PROJECT_ID" -l "$REGION" "gs://${BUCKET_NAME}"
 fi
 
+PROJECT_NUM=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
+RE_SA="service-${PROJECT_NUM}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:${RE_SA}" \
+    --role="roles/storage.objectAdmin" --quiet 2>/dev/null || true
+
 # ── Step 1: Deploy MCP Server to Cloud Run ───────────────────────────────────
 
 echo ""
