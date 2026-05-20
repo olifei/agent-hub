@@ -46,7 +46,7 @@ def eval_clip_starting_frame(starting_frame_info: dict) -> dict:
     eval_result = vertex_ai.invoke_gemini(
         prompt=image_eval_prompt,
         model_type=GeminiModelType.PRO,
-        creativity=GeminiCreativityLevel.MEDIUM,
+        creativity=GeminiCreativityLevel.LOW,
         multimodal_input=multimodal_input
     )
     best_image_idx = eval_result.get("best", -1)
@@ -76,7 +76,7 @@ def eval_single_image(input_uris: list, output_uri: str, product_desc: str) -> d
     eval_result = vertex_ai.invoke_gemini(
         prompt=image_eval_prompt,
         model_type=GeminiModelType.PRO,
-        creativity=GeminiCreativityLevel.MEDIUM,
+        creativity=GeminiCreativityLevel.LOW,
         multimodal_input=multimodal_input
     )
     
