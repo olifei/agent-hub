@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     
     # Gemini model IDs
     GEMINI_MODEL_PRO: str = "gemini-3.1-pro-preview"
-    GEMINI_MODEL_FLASH: str = "gemini-3-flash-preview"
+    GEMINI_MODEL_FLASH: str = "gemini-3.5-flash"
     GEMINI_MODEL_IMAGE: str = "gemini-3-pro-image-preview"
     
     # -----------------------------------------------------------------------------
