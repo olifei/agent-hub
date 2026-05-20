@@ -18,7 +18,7 @@ import os
 import google.auth
 from google.adk.agents import Agent
 from google.adk.apps import App
-from google.adk.models import Gemini
+from google.adk.models.google_llm import Gemini
 from google.adk.tools.mcp_tool import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import (
     StreamableHTTPConnectionParams,
@@ -27,6 +27,7 @@ from google.genai import types
 
 from .instruction import DIRECTOR_INSTRUCTION
 from .mcp_auth import make_authed_httpx_client_factory
+from .llm import GeminiWithLocation
 from .tools import (
     fetch_image_bytes,
     prepare_dataset,
@@ -55,8 +56,9 @@ ads_video_mcp = McpToolset(
 
 root_agent = Agent(
     name="product_pitch_director",
-    model=Gemini(
+    model=GeminiWithLocation(
         model="gemini-3.5-flash",
+        location="global",
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
     instruction=DIRECTOR_INSTRUCTION,
