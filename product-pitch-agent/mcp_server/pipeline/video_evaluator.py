@@ -65,7 +65,7 @@ def eval_video(
             clips_eval_result = vertex_ai.invoke_gemini(
                 prompt=get_video_eval_prompt(len(veo_results)),
                 model_type=GeminiModelType.PRO,
-                creativity=GeminiCreativityLevel.MEDIUM,
+                creativity=GeminiCreativityLevel.LOW,
                 multimodal_input=multimodal_list,
             )
         
@@ -117,7 +117,7 @@ def eval_single_video(
     eval_result = vertex_ai.invoke_gemini(
         prompt=get_video_eval_prompt(1),
         model_type=GeminiModelType.PRO,
-        creativity=GeminiCreativityLevel.MEDIUM,
+        creativity=GeminiCreativityLevel.LOW,
         multimodal_input=multimodal_list,
     )
     
