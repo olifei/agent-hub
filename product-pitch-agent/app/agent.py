@@ -56,7 +56,7 @@ ads_video_mcp = McpToolset(
 root_agent = Agent(
     name="product_pitch_director",
     model=Gemini(
-        model="gemini-flash-latest",
+        model="gemini-3.5-flash",
         retry_options=types.HttpRetryOptions(attempts=3),
     ),
     instruction=DIRECTOR_INSTRUCTION,
