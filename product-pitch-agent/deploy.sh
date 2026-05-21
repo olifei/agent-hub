@@ -5,9 +5,10 @@ set -e
 # Product Pitch Agent — Full Deployment
 #
 # Architecture:
-#   1. MCP Server → Cloud Run (container build + deploy)
-#   2. Agent → Agent Engine (agents-cli deploy)
-#   3. (optional) → Gemini Enterprise registration
+#   1. Setup: custom SA, GCS bucket, APIs, IAM
+#   2. MCP Server → Cloud Run (container build + deploy)
+#   3. Agent → Agent Engine (agents-cli deploy --service-account)
+#   4. (optional) → Gemini Enterprise registration
 #
 # Usage:
 #   bash deploy.sh <PROJECT_ID> [REGION] [--ge APP_ID]
@@ -32,6 +33,9 @@ done
 PROJECT_ID="${POSITIONAL[0]:?Usage: bash deploy.sh <PROJECT_ID> [REGION] [--ge APP_ID]}"
 REGION="${POSITIONAL[1]:-us-central1}"
 BUCKET_NAME="${PROJECT_ID}-pitch-agent-output"
+SA_NAME="pitch-flow-runtime"
+SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
+DEPLOYER=$(gcloud config get-value account 2>/dev/null)
 
 TOTAL_STEPS=2
 [ -n "$GE_APP_ID" ] && TOTAL_STEPS=3
@@ -42,26 +46,56 @@ echo "════════════════════════�
 echo "  Project:  $PROJECT_ID"
 echo "  Region:   $REGION"
 echo "  Bucket:   $BUCKET_NAME"
+echo "  SA:       $SA_EMAIL"
 [ -n "$GE_APP_ID" ] && echo "  GE App:   $GE_APP_ID"
 echo "═══════════════════════════════════════════════════════════"
 echo ""
 
-# ── Pre-flight: GCS bucket + AI Platform API ────────────────────────────────
+# ── Pre-flight: Custom SA + GCS bucket + APIs ───────────────────────────────
 
 gcloud config set project "$PROJECT_ID"
-gcloud services enable aiplatform.googleapis.com storage.googleapis.com --project="$PROJECT_ID" --quiet
+gcloud services enable aiplatform.googleapis.com storage.googleapis.com iam.googleapis.com --project="$PROJECT_ID" --quiet
 
+# Create custom SA
+if ! gcloud iam service-accounts describe "$SA_EMAIL" --project="$PROJECT_ID" &>/dev/null; then
+    echo "Creating service account: $SA_EMAIL"
+    gcloud iam service-accounts create "$SA_NAME" \
+        --display-name="Pitch flow agent runtime" \
+        --project="$PROJECT_ID"
+else
+    echo "Service account already exists: $SA_EMAIL"
+fi
+
+# Project-level roles for custom SA
+for role in roles/aiplatform.user roles/serviceusage.serviceUsageConsumer roles/logging.logWriter; do
+    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+        --member="serviceAccount:${SA_EMAIL}" \
+        --role="$role" --condition=None --quiet 2>/dev/null || true
+done
+
+# GCS bucket
 if ! gsutil ls -b "gs://${BUCKET_NAME}" &>/dev/null; then
     gsutil mb -p "$PROJECT_ID" -l "$REGION" "gs://${BUCKET_NAME}"
 fi
 
-PROJECT_NUM=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
-RE_SA="service-${PROJECT_NUM}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
-for role in roles/storage.objectAdmin roles/iam.serviceAccountTokenCreator; do
-    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-        --member="serviceAccount:${RE_SA}" \
-        --role="$role" --quiet 2>/dev/null || true
-done
+# Bucket access for custom SA
+gcloud storage buckets add-iam-policy-binding "gs://${BUCKET_NAME}" \
+    --member="serviceAccount:${SA_EMAIL}" \
+    --role=roles/storage.objectAdmin 2>/dev/null || true
+
+# Allow SA to sign blobs as itself (for presigned URLs)
+gcloud iam service-accounts add-iam-policy-binding "$SA_EMAIL" \
+    --member="serviceAccount:${SA_EMAIL}" \
+    --role=roles/iam.serviceAccountTokenCreator \
+    --project="$PROJECT_ID" 2>/dev/null || true
+
+# Let deployer impersonate the SA
+if [ -n "$DEPLOYER" ]; then
+    gcloud iam service-accounts add-iam-policy-binding "$SA_EMAIL" \
+        --member="user:${DEPLOYER}" \
+        --role=roles/iam.serviceAccountUser \
+        --project="$PROJECT_ID" 2>/dev/null || true
+fi
 
 # ── Step 1: Deploy MCP Server to Cloud Run ───────────────────────────────────
 
@@ -74,6 +108,12 @@ bash mcp_server/deploy.sh --project="$PROJECT_ID" --region="$REGION" --bucket="$
 
 MCP_SERVER_URL=$(gcloud run services describe ads-video-mcp-server \
     --region="$REGION" --project="$PROJECT_ID" --format="value(status.url)")
+
+# Grant custom SA permission to invoke MCP Server
+gcloud run services add-iam-policy-binding ads-video-mcp-server \
+    --region="$REGION" --project="$PROJECT_ID" \
+    --member="serviceAccount:${SA_EMAIL}" \
+    --role=roles/run.invoker 2>/dev/null || true
 
 echo ""
 echo "  MCP Server URL: $MCP_SERVER_URL"
@@ -90,6 +130,7 @@ uv pip install google-agents-cli --python .venv/bin/python
 DEPLOY_OUTPUT=$(GOOGLE_CLOUD_PROJECT="$PROJECT_ID" GOOGLE_CLOUD_LOCATION="$REGION" \
     MCP_SERVER_URL="$MCP_SERVER_URL" GCS_BUCKET_NAME="$BUCKET_NAME" \
     .venv/bin/agents-cli deploy --project "$PROJECT_ID" --region "$REGION" \
+    --service-account "$SA_EMAIL" \
     --update-env-vars "MCP_SERVER_URL=${MCP_SERVER_URL},GCS_BUCKET_NAME=${BUCKET_NAME}" \
     2>&1 | tee /dev/stderr) || true
 
@@ -164,6 +205,7 @@ echo ""
 echo "  MCP Server:  $MCP_SERVER_URL"
 [ -n "$REASONING_ENGINE_ID" ] && echo "  Agent:       reasoningEngines/$REASONING_ENGINE_ID"
 echo "  GCS Bucket:  gs://$BUCKET_NAME"
+echo "  Service SA:  $SA_EMAIL"
 echo ""
 echo "  Try in Playground or Gemini Enterprise!"
 echo "═══════════════════════════════════════════════════════════"
