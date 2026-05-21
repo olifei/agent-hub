@@ -57,9 +57,11 @@ fi
 
 PROJECT_NUM=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
 RE_SA="service-${PROJECT_NUM}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:${RE_SA}" \
-    --role="roles/storage.objectAdmin" --quiet 2>/dev/null || true
+for role in roles/storage.objectAdmin roles/iam.serviceAccountTokenCreator; do
+    gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+        --member="serviceAccount:${RE_SA}" \
+        --role="$role" --quiet 2>/dev/null || true
+done
 
 # ── Step 1: Deploy MCP Server to Cloud Run ───────────────────────────────────
 
